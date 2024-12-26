@@ -30,7 +30,7 @@ const PLATFORMS: Record<DefoldBuildTaskDefinition['platform'], string> = {
   current: '',
   android: 'armv7-android',
   ios: 'armv7-darwin',
-  macOS: 'x86_64-darwin',
+  macOS: 'arm64-darwin',
   windows: 'x86_64-win32',
   linux: 'x86_64-linux',
   html5: 'js-web',
@@ -40,7 +40,7 @@ const OUTPUTS: Record<DefoldBuildTaskDefinition['platform'], string> = {
   current: '',
   android: 'armv7-android',
   ios: 'armv7-ios',
-  macOS: 'x86_64-osx',
+  macOS: 'arm64-osx',
   windows: 'x86_64-win32',
   linux: 'x86_64-linux',
   html5: 'js-web',
@@ -178,12 +178,10 @@ export class DefoldTerminal implements vscode.Pseudoterminal {
       `-cp`,
       `${this.env.jar}`,
       `com.dynamo.bob.Bob`,
-      `-i`,
+      `--root`,
       `"${projectDir}"`,
       `-r`,
       `"${projectDir}"`,
-      `--exclude-build-folder`,
-      `.git, build`,
     ];
 
     let exec = java;
@@ -301,6 +299,8 @@ export class DefoldTerminal implements vscode.Pseudoterminal {
 
     // Execute the command
     // TODO: ENV variables - https://github.com/defold/defold/blob/ef879961c127c1b1e533b87ce60423387f1ef190/editor/src/clj/editor/engine.clj#L269
+
+    output().appendLine(`Executing command`);
     this.exec(exec, [...options, ...commands], cwd);
   }
 
@@ -327,7 +327,7 @@ export class DefoldTerminal implements vscode.Pseudoterminal {
     let deps: string[] = [];
     switch (platform()) {
       case 'darwin':
-        deps = ['_unpack/x86_64-darwin/bin/dmengine'];
+        deps = ['_unpack/arm64-macos/bin/dmengine'];
         break;
       case 'win32':
         deps = [
@@ -347,6 +347,7 @@ export class DefoldTerminal implements vscode.Pseudoterminal {
     const hostBuildDir = join(projectDir, 'build', OUTPUTS[HOST[platform()]]);
     try {
       readdirSync(hostBuildDir).forEach((file) => {
+        output().appendLine(`Checking -> ${file}`);
         const depIndex = deps.findIndex((dep) => basename(dep) === file);
 
         // Filter files to copy
@@ -374,6 +375,8 @@ export class DefoldTerminal implements vscode.Pseudoterminal {
       output().appendLine(`\t${error.message}`);
     }
 
+    output().appendLine(`Copying complete`);
+
     // Extract remaining dependencies from the engine archive
     const out = join(projectDir, 'build', 'default');
     const path = deps[0];
@@ -381,13 +384,17 @@ export class DefoldTerminal implements vscode.Pseudoterminal {
 
     const required = deps.filter((dep) => !existsSync(join(out, basename(dep))));
     if (required.length > 0) {
+      output().appendLine(`Noticed additional files missing`);
       required.forEach((dep) => {
+        output().appendLine(`Extracting -> ${dep}`);
         execSync(`${jar} -xf "${archive}" "${dep}"`, { cwd: out });
         copyFileSync(join(out, dep), join(out, basename(dep)));
         output().appendLine(`-> ${basename(dep)}`);
       });
 
+      output().appendLine(`Removing temp dir`);
       rmSync(join(out, '_unpack'), { recursive: true, force: true });
+      output().appendLine(`Updating permission`);
       chmodSync(join(out, basename(path)), '755');
     }
   }
