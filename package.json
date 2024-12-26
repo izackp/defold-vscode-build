@@ -2,17 +2,17 @@
   "name": "defold-vscode-build",
   "displayName": "Defold Build Tools",
   "description": "Build, Run & Package Defold Projects",
-  "version": "0.1.6",
-  "publisher": "ts-defold",
+  "version": "0.1.7",
+  "publisher": "izackp",
   "author": {
     "name": "Justin Walsh <contact.me@thejustinwalsh.com>"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ts-defold/defold-vscode-build.git"
+    "url": "https://github.com/izackp/defold-vscode-build.git"
   },
-  "homepage": "https://github.com/ts-defold/defold-vscode-build/blob/main/README.md",
+  "homepage": "https://github.com/izackp/defold-vscode-build/blob/main/README.md",
   "keywords": [
     "typescript",
     "lua",
@@ -236,7 +236,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "glob": "^7.1.7",
-    "mocha": "^9.1.1",
+    "mocha": "^11.0.1",
     "prettier": "^2.4.0",
     "ts-loader": "^9.2.5",
     "typescript": "^4.4.3",
